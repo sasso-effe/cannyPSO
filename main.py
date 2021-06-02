@@ -1,3 +1,4 @@
+import imageio as imageio
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -170,16 +171,26 @@ def pso(img, goal, max_iterations, tol, tmax):
     for i in range(max_iterations):
         plane.move_particles()
         positions = np.array(list(map(lambda x: x.pos, plane.particles)))
+        positions = np.concatenate([positions, np.array(plane.best_pos, ndmin=2)])
+        colors = np.array(['C0' for i in range(positions.shape[0] - 1)] + ['C1'])
+        print(colors)
         scat.set_offsets(positions)
+        scat.set_facecolors(colors)
         tl, th = plane.best_pos
         ax2.imshow(cv2.Canny(img, tl, th), cmap="gray")
         print("Current best = " + str(plane.best_value) + " at position " + str(plane.best_pos))
-        plt.pause(0.01)
+        plt.pause(0.02)
+        plt.savefig("{0}.png".format(i))
         if plane.best_value < tol:
             break
     print("finished after " + str(i+1) + " iterations")
     print("position: " + str(plane.best_pos))
     print("value: " + str(plane.best_value))
+
+    with imageio.get_writer('mygif.gif', mode='I') as writer:
+        for j in range(i+1):
+            img = imageio.imread("{0}.png".format(j))
+            writer.append_data(img)
 
 
 # Press the green button in the gutter to run the script.
