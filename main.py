@@ -78,6 +78,7 @@ def obj_function(img, pos, goal, lut):
 
 def pso(imgs, goals, max_iterations, tol, tmax):
     plane = Plane(50, imgs, goals, w=0.5, c1=0.8, c2=0.9, tmax=tmax)
+    values = [plane.best_value]
     plt.ion()
     fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2, 3, figsize=(18, 6))
     positions = np.array(list(map(lambda x: x.pos, plane.particles)))
@@ -88,12 +89,16 @@ def pso(imgs, goals, max_iterations, tol, tmax):
     tl, th = plane.best_pos
     ax2.imshow(cv2.Canny(imgs[0], tl, th), cmap="gray")
     ax3.imshow(goals[0], cmap="gray")
+    #ax4.set_ylim([0, 1])
+    ax4.set_yscale('log')
+    ax4.plot(values)
     ax5.imshow(cv2.Canny(imgs[1], tl, th), cmap="gray")
     ax6.imshow(goals[1], cmap="gray")
     plt.show()
     plt.pause(0.05)
     for i in range(max_iterations):
         plane.move_particles()
+        values.append(plane.best_value)
         positions = np.array(list(map(lambda x: x.pos, plane.particles)))
         positions = np.concatenate([positions, np.array(plane.best_pos, ndmin=2)])
         colors = np.array(['C0' for i in range(positions.shape[0] - 1)] + ['C1'])
@@ -101,11 +106,14 @@ def pso(imgs, goals, max_iterations, tol, tmax):
         scat.set_facecolors(colors)
         tl, th = plane.best_pos
         ax2.imshow(cv2.Canny(imgs[0], tl, th), cmap="gray")
+        ax4.clear()
+        ax4.set_yscale('log')
+        ax4.plot(values)
         ax5.imshow(cv2.Canny(imgs[1], tl, th), cmap="gray")
         print("Current best = " + str(plane.best_value) + " at position " + str(plane.best_pos))
         plt.pause(0.01)
         plt.savefig("{0}.png".format(i))
-        if plane.best_value < tol:
+        if (plane.best_value < tol) or (len(values) >= 5 and values[-1] == values[-5]):
             break
     print("finished after " + str(i + 1) + " iterations")
     print("position: " + str(plane.best_pos))
