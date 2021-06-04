@@ -4,6 +4,7 @@ import cv2
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 import random
+import sys
 
 
 class Particle:
@@ -113,29 +114,31 @@ def pso(imgs, goals, max_iterations, tol, tmax):
         print("Current best = " + str(plane.best_value) + " at position " + str(plane.best_pos))
         plt.pause(0.01)
         plt.savefig("{0}.png".format(i))
-        if (plane.best_value < tol) or (len(values) >= 5 and values[-1] == values[-5]):
+        if (plane.best_value < tol) or (len(values) >= 10 and values[-1] == values[-10]):
             break
     print("finished after " + str(i + 1) + " iterations")
     print("position: " + str(plane.best_pos))
     print("value: " + str(plane.best_value))
 
-    with imageio.get_writer('mygif.gif', mode='I') as writer:
-        for j in range(i+1):
-            img = imageio.imread("{0}.png".format(j))
-            writer.append_data(img)
-
+    print("Save as gif? y/n")
+    line = sys.stdin.readline()
+    if line.rstrip() == "y":
+        with imageio.get_writer('mygif.gif', mode='I') as writer:
+            for j in range(i+1):
+                img = imageio.imread("{0}.png".format(j))
+                writer.append_data(img)
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     img_names = ["chessboard1.jpeg", "chessboard2.jpg"]
-    thresholds = [[80, 530], [80, 500]]
-    tmax = 1000
+    goal_names = ["goal_chessboard1.jpeg", "goal_chessboard2.jpg"]
+    tmax = 1500
 
     images = []
     goals = []
-    for n, th in zip(img_names, thresholds):
+    for n, g in zip(img_names, goal_names):
         img = cv2.imread("res/{0}".format(n), cv2.IMREAD_GRAYSCALE)
         img = cv2.GaussianBlur(img, (5, 5), 0)
         images.append(img)
-        goals.append(cv2.Canny(img, th[0], th[1]))
+        goals.append(cv2.imread("res/{0}".format(g), cv2.IMREAD_GRAYSCALE))
     pso(images, goals, 20, 1e-10, tmax)
