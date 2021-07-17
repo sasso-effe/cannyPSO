@@ -145,7 +145,7 @@ def load_images(img_names, goal_names):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    images_names = ["kiwi_1.png"]
-    goals_names = ["kiwi_1_goal.png"]
+    images_names = ["kiwi_3.png", "kiwi_2.png"]
+    goals_names = ["kiwi_3_goal.png", "kiwi_2_goal.png"]
     images, goals = load_images(images_names, goals_names)
     pso(images, goals, max_iterations=20, tol=1e-10, t_max=1500, w=0.5, c1=0.8, c2=0.9)
